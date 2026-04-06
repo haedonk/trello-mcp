@@ -1,0 +1,823 @@
+{
+  "info": {
+    "name": "Trello API - AI Stem Board",
+    "description": "Collection for interacting with Trello's REST API directly. Use it to validate responses against what this MCP server returns (cards are typically stripped to: id, name, desc, idList, idBoard, idLabels, idMembers, due, dueComplete, closed, pos, shortUrl).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://api.trello.com/1",
+      "type": "string"
+    },
+    {
+      "key": "api_key",
+      "value": "YOUR_API_KEY_HERE",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "YOUR_TOKEN_HERE",
+      "type": "string"
+    },
+    {
+      "key": "board_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "card_fields",
+      "value": "id,name,desc,idList,idBoard,idLabels,idMembers,due,dueComplete,closed,pos,shortUrl",
+      "type": "string",
+      "description": "Fields returned by the MCP server after stripping"
+    },
+    {
+      "key": "card_id",
+      "value": "",
+      "type": "string",
+      "description": "Set this after creating or fetching a card"
+    },
+    {
+      "key": "list_id",
+      "value": "",
+      "type": "string",
+      "description": "Set this after calling Get All Lists"
+    },
+    {
+      "key": "label_id",
+      "value": "",
+      "type": "string",
+      "description": "Set this after calling Get Board Labels"
+    },
+    {
+      "key": "checklist_id",
+      "value": "",
+      "type": "string",
+      "description": "Set this after creating a checklist"
+    }
+  ],
+  "item": [
+    {
+      "name": "Board",
+      "item": [
+        {
+          "name": "Get Board Info",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/boards/{{board_id}}?key={{api_key}}&token={{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "boards",
+                "{{board_id}}"
+              ],
+              "query": [
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}"
+                }
+              ]
+            },
+            "description": "Get full details about the board in {{board_id}}."
+          }
+        },
+        {
+          "name": "Get Board Members",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/boards/{{board_id}}/members?key={{api_key}}&token={{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "boards",
+                "{{board_id}}",
+                "members"
+              ],
+              "query": [
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}"
+                }
+              ]
+            },
+            "description": "Get all members on the board. Use member IDs in idMembers when creating/updating cards."
+          }
+        },
+        {
+          "name": "Get Board Labels",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/boards/{{board_id}}/labels?key={{api_key}}&token={{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "boards",
+                "{{board_id}}",
+                "labels"
+              ],
+              "query": [
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}"
+                }
+              ]
+            },
+            "description": "Get all labels. Returns [{id, name, color}]. Copy a label id into {{label_id}}."
+          }
+        },
+        {
+          "name": "Create Label",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/labels?name=New Label&color=blue&idBoard={{board_id}}&key={{api_key}}&token={{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "labels"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "New Label"
+                },
+                {
+                  "key": "color",
+                  "value": "blue",
+                  "description": "black, blue, green, lime, orange, pink, purple, red, sky, yellow, null"
+                },
+                {
+                  "key": "idBoard",
+                  "value": "{{board_id}}"
+                },
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}"
+                }
+              ]
+            },
+            "description": "Create a new label on the board."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lists",
+      "item": [
+        {
+          "name": "Get All Lists",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/boards/{{board_id}}/lists?key={{api_key}}&token={{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "boards",
+                "{{board_id}}",
+                "lists"
+              ],
+              "query": [
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}"
+                }
+              ]
+            },
+            "description": "Get all lists (columns) on the board. Copy a list id into {{list_id}}."
+          }
+        },
+        {
+          "name": "Create List",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/lists?name=New List&idBoard={{board_id}}&key={{api_key}}&token={{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "lists"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "New List"
+                },
+                {
+                  "key": "idBoard",
+                  "value": "{{board_id}}"
+                },
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}"
+                }
+              ]
+            },
+            "description": "Create a new list on the board."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cards",
+      "item": [
+        {
+          "name": "Get All Cards (Stripped Fields)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/boards/{{board_id}}/cards?filter=open&fields={{card_fields}}&key={{api_key}}&token={{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "boards",
+                "{{board_id}}",
+                "cards"
+              ],
+              "query": [
+                {
+                  "key": "filter",
+                  "value": "open"
+                },
+                {
+                  "key": "fields",
+                  "value": "{{card_fields}}",
+                  "description": "Matches what the MCP server returns after stripping"
+                },
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}"
+                }
+              ]
+            },
+            "description": "Get all open cards with only the fields the MCP server returns. Use this to verify the strip output matches."
+          }
+        },
+        {
+          "name": "Get All Cards (Full Response)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/boards/{{board_id}}/cards?filter=open&key={{api_key}}&token={{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "boards",
+                "{{board_id}}",
+                "cards"
+              ],
+              "query": [
+                {
+                  "key": "filter",
+                  "value": "open"
+                },
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}"
+                }
+              ]
+            },
+            "description": "Get all cards with the full Trello response (badges, agent, descData, etc.) for comparison."
+          }
+        },
+        {
+          "name": "Get Cards on List (Stripped Fields)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/lists/{{list_id}}/cards?filter=open&fields={{card_fields}}&key={{api_key}}&token={{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "lists",
+                "{{list_id}}",
+                "cards"
+              ],
+              "query": [
+                {
+                  "key": "filter",
+                  "value": "open"
+                },
+                {
+                  "key": "fields",
+                  "value": "{{card_fields}}"
+                },
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}"
+                }
+              ]
+            },
+            "description": "Get open cards on a specific list. Set {{list_id}} from Get All Lists."
+          }
+        },
+        {
+          "name": "Create Card",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/cards?idList={{list_id}}&name=New Card&desc=Card description&fields={{card_fields}}&key={{api_key}}&token={{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "cards"
+              ],
+              "query": [
+                {
+                  "key": "idList",
+                  "value": "{{list_id}}",
+                  "description": "Required - set {{list_id}} first"
+                },
+                {
+                  "key": "name",
+                  "value": "New Card"
+                },
+                {
+                  "key": "desc",
+                  "value": "Card description"
+                },
+                {
+                  "key": "fields",
+                  "value": "{{card_fields}}"
+                },
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}"
+                }
+              ]
+            },
+            "description": "Create a card. Copy the returned id into {{card_id}}."
+          }
+        },
+        {
+          "name": "Create Card (With Label and Member)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/cards?idList={{list_id}}&name=New Card&desc=Description&idLabels={{label_id}}&idMembers=MEMBER_ID&fields={{card_fields}}&key={{api_key}}&token={{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "cards"
+              ],
+              "query": [
+                {
+                  "key": "idList",
+                  "value": "{{list_id}}"
+                },
+                {
+                  "key": "name",
+                  "value": "New Card"
+                },
+                {
+                  "key": "desc",
+                  "value": "Description"
+                },
+                {
+                  "key": "idLabels",
+                  "value": "{{label_id}}",
+                  "description": "Comma-separated label IDs"
+                },
+                {
+                  "key": "idMembers",
+                  "value": "MEMBER_ID",
+                  "description": "Comma-separated member IDs from Get Board Members"
+                },
+                {
+                  "key": "fields",
+                  "value": "{{card_fields}}"
+                },
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}"
+                }
+              ]
+            },
+            "description": "Create a card with labels and assigned members."
+          }
+        },
+        {
+          "name": "Update Card",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{base_url}}/cards/{{card_id}}?name=Updated Name&desc=Updated description&fields={{card_fields}}&key={{api_key}}&token={{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "cards",
+                "{{card_id}}"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "Updated Name"
+                },
+                {
+                  "key": "desc",
+                  "value": "Updated description"
+                },
+                {
+                  "key": "fields",
+                  "value": "{{card_fields}}"
+                },
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}"
+                }
+              ]
+            },
+            "description": "Update card name and/or description. Set {{card_id}} first."
+          }
+        },
+        {
+          "name": "Move Card to List",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{base_url}}/cards/{{card_id}}?idList=TARGET_LIST_ID&fields={{card_fields}}&key={{api_key}}&token={{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "cards",
+                "{{card_id}}"
+              ],
+              "query": [
+                {
+                  "key": "idList",
+                  "value": "TARGET_LIST_ID",
+                  "description": "ID of the destination list"
+                },
+                {
+                  "key": "fields",
+                  "value": "{{card_fields}}"
+                },
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}"
+                }
+              ]
+            },
+            "description": "Move a card to a different list (e.g. To Do -> In Progress). Set {{card_id}} first."
+          }
+        },
+        {
+          "name": "Archive Card",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{base_url}}/cards/{{card_id}}?closed=true&fields={{card_fields}}&key={{api_key}}&token={{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "cards",
+                "{{card_id}}"
+              ],
+              "query": [
+                {
+                  "key": "closed",
+                  "value": "true"
+                },
+                {
+                  "key": "fields",
+                  "value": "{{card_fields}}"
+                },
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}"
+                }
+              ]
+            },
+            "description": "Archive a card (set closed=true). Use closed=false to unarchive."
+          }
+        },
+        {
+          "name": "Delete Card",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/cards/{{card_id}}?key={{api_key}}&token={{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "cards",
+                "{{card_id}}"
+              ],
+              "query": [
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}"
+                }
+              ]
+            },
+            "description": "Permanently delete a card. This cannot be undone. Prefer Archive Card instead."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Checklists",
+      "item": [
+        {
+          "name": "Create Checklist on Card",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/checklists?idCard={{card_id}}&name=Sprint Tasks&key={{api_key}}&token={{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "checklists"
+              ],
+              "query": [
+                {
+                  "key": "idCard",
+                  "value": "{{card_id}}",
+                  "description": "Set {{card_id}} first"
+                },
+                {
+                  "key": "name",
+                  "value": "Sprint Tasks"
+                },
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}"
+                }
+              ]
+            },
+            "description": "Add a checklist to a card. Copy the returned id into {{checklist_id}}."
+          }
+        },
+        {
+          "name": "Add Checklist Item",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/checklists/{{checklist_id}}/checkItems?name=Task item&key={{api_key}}&token={{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "checklists",
+                "{{checklist_id}}",
+                "checkItems"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "Task item"
+                },
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}"
+                }
+              ]
+            },
+            "description": "Add an item to a checklist. Set {{checklist_id}} first."
+          }
+        },
+        {
+          "name": "Update Checklist",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{base_url}}/checklists/{{checklist_id}}?name=Renamed Checklist&key={{api_key}}&token={{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "checklists",
+                "{{checklist_id}}"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "Renamed Checklist",
+                  "description": "Optional: new checklist name"
+                },
+                {
+                  "key": "idCard",
+                  "value": "",
+                  "description": "Optional: move checklist to another card by setting the destination card ID"
+                },
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}"
+                }
+              ]
+            },
+            "description": "Update a checklist (rename and/or move it to another card via idCard)."
+          }
+        },
+        {
+          "name": "Delete Checklist",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/checklists/{{checklist_id}}?key={{api_key}}&token={{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "checklists",
+                "{{checklist_id}}"
+              ],
+              "query": [
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}"
+                }
+              ]
+            },
+            "description": "Delete a checklist."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Comments",
+      "item": [
+        {
+          "name": "Add Comment to Card",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/cards/{{card_id}}/actions/comments?text=Comment text here&key={{api_key}}&token={{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "cards",
+                "{{card_id}}",
+                "actions",
+                "comments"
+              ],
+              "query": [
+                {
+                  "key": "text",
+                  "value": "Comment text here"
+                },
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}"
+                }
+              ]
+            },
+            "description": "Add a comment to a card. Set {{card_id}} first."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "item": [
+        {
+          "name": "Search Cards (Stripped Fields)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/search?query=YOUR_SEARCH_TERM&idBoards={{board_id}}&modelTypes=cards&cards_filter=open&card_fields={{card_fields}}&key={{api_key}}&token={{token}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "YOUR_SEARCH_TERM"
+                },
+                {
+                  "key": "idBoards",
+                  "value": "{{board_id}}"
+                },
+                {
+                  "key": "modelTypes",
+                  "value": "cards"
+                },
+                {
+                  "key": "cards_filter",
+                  "value": "open"
+                },
+                {
+                  "key": "card_fields",
+                  "value": "{{card_fields}}",
+                  "description": "Matches what the MCP server returns after stripping"
+                },
+                {
+                  "key": "key",
+                  "value": "{{api_key}}"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}"
+                }
+              ]
+            },
+            "description": "Search for cards by keyword. card_fields limits the response to match the MCP server output."
+          }
+        }
+      ]
+    }
+  ]
+}

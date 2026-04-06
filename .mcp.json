@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "trello-mcp": {
+      "type": "sse",
+      "url": "http://localhost:8000/sse",
+      "auth": "none"
+    }
+  }
+}

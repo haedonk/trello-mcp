@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install:*)",
+      "Bash(python -c \"import server; print\\(f''Loaded {len\\(server.mcp._tool_manager._tools\\)} tools:''\\); [print\\(f''  - {name}''\\) for name in server.mcp._tool_manager._tools]\")",
+      "Bash(chmod:*)",
+      "Bash(python -c \":*)",
+      "WebFetch(domain:10.0.0.110)",
+      "Bash(xargs grep:*)",
+      "Bash(python3:*)",
+      "Bash(node:*)",
+      "Read(//mnt/c/Users/haka9/Projects/Class Projects/**)",
+      "Bash(python -c \"from mcp.server.fastmcp import FastMCP; help\\(FastMCP.streamable_http_app\\)\")",
+      "Bash(python -c \"import inspect; from mcp.server.fastmcp import FastMCP; print\\(inspect.signature\\(FastMCP.streamable_http_app\\)\\)\")"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "trello-mcp"
+  ]
+}

@@ -1,0 +1,833 @@
+{
+  "info": {
+    "name": "Trello MCP Server",
+    "description": "Test the Trello MCP server (example: http://localhost:8000).\n\n**How to use:**\n1. Run '1. Connect (SSE)' — in the response body look for the line starting with `data:`, it will contain `/messages/?session_id=XXXXXXXX`. Copy that UUID.\n2. Set the `session_id` collection variable to that UUID.\n3. Run '2. Initialize' — required before calling any tools.\n4. Run any tool requests.\n\nAll tool calls POST to `/messages/?session_id={{session_id}}` with a JSON-RPC 2.0 body.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "session_id",
+      "value": "",
+      "type": "string",
+      "description": "Set this from the `data:` line returned by the SSE connect request"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Connect (SSE)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "text/event-stream"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/sse",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "sse"
+          ]
+        },
+        "description": "Open the SSE stream. The server will immediately send an event like:\n\n  event: endpoint\n  data: /messages/?session_id=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX\n\nCopy the UUID from the `data:` line and paste it into the `session_id` collection variable."
+      }
+    },
+    {
+      "name": "2. Initialize",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 1,\n  \"method\": \"initialize\",\n  \"params\": {\n    \"protocolVersion\": \"2024-11-05\",\n    \"capabilities\": {},\n    \"clientInfo\": {\n      \"name\": \"postman\",\n      \"version\": \"1.0.0\"\n    }\n  }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "messages",
+            ""
+          ],
+          "query": [
+            {
+              "key": "session_id",
+              "value": "{{session_id}}"
+            }
+          ]
+        },
+        "description": "Must be called once after connecting. Returns 202 Accepted. The actual response arrives via the SSE stream."
+      }
+    },
+    {
+      "name": "3. List Tools",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 2,\n  \"method\": \"tools/list\",\n  \"params\": {}\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "messages",
+            ""
+          ],
+          "query": [
+            {
+              "key": "session_id",
+              "value": "{{session_id}}"
+            }
+          ]
+        },
+        "description": "List all available tools and their input schemas. Useful for verifying the server is running and tools are registered."
+      }
+    },
+    {
+      "name": "Board",
+      "item": [
+        {
+          "name": "get_boards",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 9,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"get_boards\",\n    \"arguments\": {}\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "session_id",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Get all boards accessible to the authenticated user. Useful for finding board IDs."
+          }
+        },
+        {
+          "name": "set_board",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 9,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"set_board\",\n    \"arguments\": {\n      \"board_id\": \"BOARD_ID_HERE\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "session_id",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Set the active board for this MCP session. Replace BOARD_ID_HERE with an ID from get_boards."
+          }
+        },
+        {
+          "name": "get_board_info",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 10,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"get_board_info\",\n    \"arguments\": {}\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "session_id",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Get full details about the Trello board."
+          }
+        },
+        {
+          "name": "get_board_members",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 11,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"get_board_members\",\n    \"arguments\": {}\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "session_id",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Get all members on the board. Note member IDs for use in create_cards / update_cards."
+          }
+        },
+        {
+          "name": "get_board_labels",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 12,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"get_board_labels\",\n    \"arguments\": {}\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "session_id",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Get all labels. Returns [{id, name, color}]. Note label IDs for use in create_cards."
+          }
+        },
+        {
+          "name": "create_label",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 13,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"create_label\",\n    \"arguments\": {\n      \"name\": \"New Label\",\n      \"color\": \"blue\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "session_id",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Create a new label. Valid colors: black, blue, green, lime, orange, pink, purple, red, sky, yellow, null."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lists",
+      "item": [
+        {
+          "name": "get_lists",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 20,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"get_lists\",\n    \"arguments\": {}\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "session_id",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Get all lists (columns) on the board. Note list IDs for card operations."
+          }
+        },
+        {
+          "name": "create_list",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 21,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"create_list\",\n    \"arguments\": {\n      \"name\": \"New List\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "session_id",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Create a new list on the board."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cards",
+      "item": [
+        {
+          "name": "get_cards",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 30,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"get_cards\",\n    \"arguments\": {}\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "session_id",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Get all open cards on the board (excluding Archive list). Verify response only contains stripped fields: id, name, desc, idList, idBoard, idLabels, idMembers, due, dueComplete, closed, pos, shortUrl."
+          }
+        },
+        {
+          "name": "get_cards_on_list",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 31,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"get_cards_on_list\",\n    \"arguments\": {\n      \"list_ids\": [\"LIST_ID_HERE\"]\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "session_id",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Get open cards on one or more lists. Replace LIST_ID_HERE with a real list ID from get_lists. Accepts multiple IDs in the array."
+          }
+        },
+        {
+          "name": "create_cards",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 32,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"create_cards\",\n    \"arguments\": {\n      \"cards\": [\n        {\n          \"list_id\": \"LIST_ID_HERE\",\n          \"name\": \"Test Card\",\n          \"desc\": \"Created via MCP\",\n          \"label_ids\": \"\",\n          \"member_ids\": \"\"\n        }\n      ]\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "session_id",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Create one or more cards. label_ids and member_ids are comma-separated strings (or empty). Replace LIST_ID_HERE."
+          }
+        },
+        {
+          "name": "create_cards (with label + member)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 33,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"create_cards\",\n    \"arguments\": {\n      \"cards\": [\n        {\n          \"list_id\": \"LIST_ID_HERE\",\n          \"name\": \"Labelled Card\",\n          \"desc\": \"Has a label and member assigned\",\n          \"label_ids\": \"LABEL_ID_HERE\",\n          \"member_ids\": \"MEMBER_ID_HERE\"\n        }\n      ]\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "session_id",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Create a card with a label and member assigned. Get IDs from get_board_labels and get_board_members."
+          }
+        },
+        {
+          "name": "update_cards",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 34,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"update_cards\",\n    \"arguments\": {\n      \"updates\": [\n        {\n          \"card_id\": \"CARD_ID_HERE\",\n          \"name\": \"Updated Title\",\n          \"desc\": \"Updated description\",\n          \"list_id\": \"\"\n        }\n      ]\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "session_id",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Update name, desc, or list for one or more cards. Omit (empty string) any field you don't want to change."
+          }
+        },
+        {
+          "name": "move_cards",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 35,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"move_cards\",\n    \"arguments\": {\n      \"moves\": [\n        {\n          \"card_id\": \"CARD_ID_HERE\",\n          \"list_id\": \"TARGET_LIST_ID_HERE\"\n        }\n      ]\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "session_id",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Move one or more cards to a different list."
+          }
+        },
+        {
+          "name": "delete_cards",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 36,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"delete_cards\",\n    \"arguments\": {\n      \"card_ids\": [\"CARD_ID_HERE\"]\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "session_id",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Permanently delete one or more cards. Cannot be undone."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Checklists",
+      "item": [
+        {
+          "name": "create_checklists",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 40,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"create_checklists\",\n    \"arguments\": {\n      \"checklists\": [\n        {\n          \"card_id\": \"CARD_ID_HERE\",\n          \"name\": \"Sprint Tasks\"\n        }\n      ]\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "session_id",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Add one or more checklists to cards. Note the returned checklist id for add_checklist_items."
+          }
+        },
+        {
+          "name": "add_checklist_items",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 41,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"add_checklist_items\",\n    \"arguments\": {\n      \"items\": [\n        {\n          \"checklist_id\": \"CHECKLIST_ID_HERE\",\n          \"name\": \"Task item one\"\n        },\n        {\n          \"checklist_id\": \"CHECKLIST_ID_HERE\",\n          \"name\": \"Task item two\"\n        }\n      ]\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "session_id",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Add one or more items to a checklist. Replace CHECKLIST_ID_HERE with the id from create_checklists."
+          }
+        },
+        {
+          "name": "update_checklists",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 42,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"update_checklists\",\n    \"arguments\": {\n      \"updates\": [\n        {\n          \"checklist_id\": \"CHECKLIST_ID_HERE\",\n          \"name\": \"Renamed Checklist\",\n          \"card_id\": \"\"\n        }\n      ]\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "session_id",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Update one or more checklists (rename and/or move to another card). Set name and/or card_id."
+          }
+        },
+        {
+          "name": "delete_checklists",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 43,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"delete_checklists\",\n    \"arguments\": {\n      \"deletes\": [\n        {\n          \"checklist_id\": \"CHECKLIST_ID_HERE\"\n        }\n      ]\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "session_id",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Delete one or more checklists."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Comments",
+      "item": [
+        {
+          "name": "add_comments",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 50,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"add_comments\",\n    \"arguments\": {\n      \"comments\": [\n        {\n          \"card_id\": \"CARD_ID_HERE\",\n          \"text\": \"This is a test comment from Postman.\"\n        }\n      ]\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "session_id",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Add one or more comments to cards."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "item": [
+        {
+          "name": "search_cards",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 60,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"search_cards\",\n    \"arguments\": {\n      \"query\": \"your search term here\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/messages/?session_id={{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "session_id",
+                  "value": "{{session_id}}"
+                }
+              ]
+            },
+            "description": "Search for cards by keyword. Archive list cards are excluded. Response cards are stripped to the 12-field set."
+          }
+        }
+      ]
+    }
+  ]
+}
