@@ -45,3 +45,6 @@ Desktop.ini
 # Logs
 *.log
 
+# Claude / Claude Code
+.claude/
+claude/
